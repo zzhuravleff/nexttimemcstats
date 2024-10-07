@@ -31,10 +31,13 @@ const fetchAndWriteData = async () => {
 
 const deleteOldData = async () => {
   try {
+    const date = new Date(Date.now() - 86400000);
+    const isoDate = date.toISOString();
+
     const { data: supabaseData, error } = await supabaseClient
       .from('stats')
       .delete()
-      .lt('created_at', new Date(Date.now() - 86400000)); // 86400000 - количество миллисекунд в сутках
+      .lt('created_at', isoDate);
 
     if (error) {
       console.error(error);
