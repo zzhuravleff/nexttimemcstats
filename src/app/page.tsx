@@ -49,12 +49,12 @@ const deleteOldData = async () => {
   }
 };
 
-const cronJobFetchData = cron.schedule('*/1 * * * *', fetchAndWriteData, {
+const cronJobFetchData = cron.schedule('*/10 * * * *', fetchAndWriteData, {
   scheduled: true,
   timezone: 'Europe/Moscow'
 });
 
-const cronJobDeleteOldData = cron.schedule('*/1 * * * *', () => {
+const cronJobDeleteOldData = cron.schedule('*/10 * * * *', () => {
   console.log('Delete old data cron job started');
   deleteOldData();
 });
