@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { createClient } from '@supabase/supabase-js';
-import cron from 'node-cron';
 
 const supabaseUrl = 'https://lduzndpbosjjueruqqee.supabase.co';
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkdXpuZHBib3NqanVlcnVxcWVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjExNTQ5ODYsImV4cCI6MjAzNjczMDk4Nn0.rvC9GV8-HlWYQNgpU_OjPimcqpV0YLtwWPacAy7UvXA';
@@ -49,18 +48,52 @@ const deleteOldData = async () => {
   }
 };
 
-const cronJobFetchData = cron.schedule('*/10 * * * *', fetchAndWriteData, {
-  scheduled: true,
-  timezone: 'Europe/Moscow'
-});
+const cronJobFetchData = async () => {
+  try {
+    console.log('Cron job started');
+    await fetchAndWriteData();
 
-const cronJobDeleteOldData = cron.schedule('*/10 * * * *', () => {
-  console.log('Delete old data cron job started');
-  deleteOldData();
-});
+    // Отправляем запрос на cron-job.org
+    await axios.post('https://cron-job.org/en/jobs/your-job-id', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: JSON.stringify({
+        // данные, которые будут переданы в запросе
+      }),
+    });
 
-  cronJobFetchData.start();
-  cronJobDeleteOldData.start();
+    await cronJobFetchData();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const cronJobDeleteOldData = async () => {
+  try {
+    console.log('Delete old data cron job started');
+    await deleteOldData();
+
+    // Отправляем запрос на cron-job.org
+    await axios.post('https://cron-job.org/en/jobs/your-job-id', {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: JSON.stringify({
+        // данные, которые будут переданы в запросе
+      }),
+    });
+
+    await cronJobDeleteOldData();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+(async () => {
+  await cronJobFetchData();
+  await cronJobDeleteOldData();
+})();
 
 
 export default function Home() {
